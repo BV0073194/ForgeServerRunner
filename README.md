@@ -51,17 +51,7 @@
 
 ## Requirements
 
-- **ALL WILL BE BUNDLED IN THE INSTALLER (WHEN RELEASED)**
-
-- **Java Runtime Environment (JRE)**:
-  - Required to run the Minecraft server. ([Download](https://www.java.com/en/download/manual.jsp)).
-
-- **Minecraft Forge Server JAR**:
-  - `forge-1.16.5-36.2.42.jar` must be located in the same directory as `ForgeServer.exe`. ([Current Forge Version](https://maven.minecraftforge.net/net/minecraftforge/forge/1.16.5-36.2.42/forge-1.16.5-36.2.42-installer.jar)).
-
-- **.NET 8.0 Desktop Runtime**:
-  - Required for the ForgeServer application to run. ([Windows x64](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-8.0.402-windows-x64-installer)).
-  - x86 Unsupported as of right now.
+- **Windows x64 Arch type**
 
 ## License
 
