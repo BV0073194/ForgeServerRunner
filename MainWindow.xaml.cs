@@ -328,10 +328,26 @@ namespace ForgeServer_1._16._5__36._2._42_
             // Prevent window from closing until cleanup is done
             e.Cancel = true;
 
-            // Attempt a graceful server stop
+            bool isPreparingSpawn = false;
+            bool worldLoaded = false;
+
+            // Check console output for the server's state
+            Dispatcher.Invoke(() =>
+            {
+                string consoleText = ConsoleOutput.Text;
+                isPreparingSpawn = consoleText.Contains("Preparing spawn area");
+                worldLoaded = consoleText.Contains("Time elapsed:");
+            });
+
+            if (isPreparingSpawn && !worldLoaded)
+            {
+                AppendToConsole("[WARNING] Cannot close the window while the world is loading. Please wait for the server to finish loading.");
+                return; // Keep the window open
+            }
+
             if (_isServerRunning)
             {
-                AppendToConsole("[INFO] Closing the application. Attempting to stop the server...");
+                AppendToConsole("[INFO] Closing the application. Waiting for the server to shut down...");
                 await GracefulStopServerAsync();
             }
 
@@ -357,12 +373,13 @@ namespace ForgeServer_1._16._5__36._2._42_
             if (_playItOutputWindow != null && _playItOutputWindow.IsVisible)
             {
                 _playItOutputWindow.Close();
-                this.Close();
             }
 
-            // Allow the window to close
+            // Save configuration and allow the window to close
             SaveConfiguration();
-            e.Cancel = false;
+            AppendToConsole("[INFO] Shutdown complete. Closing application...");
+            e.Cancel = false; // Allow window to close
+            Application.Current.Shutdown(); // Ensure application exits
         }
 
         private async Task GracefulStopServerAsync()
