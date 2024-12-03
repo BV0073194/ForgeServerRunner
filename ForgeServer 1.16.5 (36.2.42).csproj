@@ -9,6 +9,7 @@
     <UseWPF>true</UseWPF>
     <PackageIcon>forge-icon.png</PackageIcon>
     <ApplicationIcon>Resources\forge-icon.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>
