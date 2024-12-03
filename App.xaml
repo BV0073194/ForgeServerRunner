@@ -1,0 +1,9 @@
+﻿<Application x:Class="ForgeServer_1._16._5__36._2._42_.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:ForgeServer_1._16._5__36._2._42_"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+         
+    </Application.Resources>
+</Application>

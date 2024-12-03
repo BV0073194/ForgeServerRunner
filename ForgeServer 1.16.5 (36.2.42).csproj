@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <RootNamespace>ForgeServer_1._16._5__36._2._42_</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <PackageIcon>forge-icon.png</PackageIcon>
+    <ApplicationIcon>Resources\forge-icon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\forge-icon.ico" />
+    <None Remove="Resources\forge-icon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\forge-icon.ico" />
+    <Resource Include="Resources\forge-icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </Resource>
+  </ItemGroup>
+
+
+
+</Project>
