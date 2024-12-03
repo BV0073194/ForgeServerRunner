@@ -115,8 +115,88 @@ namespace ForgeServer_1._16._5__36._2._42_
             StopPlayIt();
         }
 
+        private void EnsurePlayItInstalled()
+        {
+            // Default installation path
+            string playItPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "playit_gg", "bin", "playit.exe");
+
+            // Check if PlayIt is installed
+            if (File.Exists(playItPath))
+            {
+                AppendToConsole("[INFO] PlayIt is installed.");
+                return;
+            }
+
+            // If PlayIt is not installed, check if it exists in PATH
+            string pathVariable = Environment.GetEnvironmentVariable("PATH");
+            if (pathVariable != null)
+            {
+                string[] paths = pathVariable.Split(';');
+                foreach (string path in paths)
+                {
+                    if (File.Exists(Path.Combine(path, "playit.exe")))
+                    {
+                        AppendToConsole("[INFO] PlayIt is found in PATH.");
+                        return;
+                    }
+                }
+            }
+
+            // If not found, download the installer
+            AppendToConsole("[INFO] PlayIt not found. Downloading installer...");
+            string installerUrl = "https://github.com/playit-cloud/playit-agent/releases/latest/download/playit-windows-x86_64-signed.msi";
+            string tempInstallerPath = Path.Combine(Path.GetTempPath(), "playit-installer.msi");
+
+            try
+            {
+                using (var client = new System.Net.WebClient())
+                {
+                    client.DownloadFile(installerUrl, tempInstallerPath);
+                    AppendToConsole("[INFO] PlayIt installer downloaded successfully.");
+                }
+
+                // Install PlayIt
+                Process installProcess = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = "msiexec.exe",
+                        Arguments = $"/i \"{tempInstallerPath}\" /quiet",
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    }
+                };
+                installProcess.Start();
+                installProcess.WaitForExit();
+
+                // Confirm installation
+                if (File.Exists(playItPath))
+                {
+                    AppendToConsole("[INFO] PlayIt installed successfully.");
+                }
+                else
+                {
+                    AppendToConsole("[ERROR] PlayIt installation failed.");
+                }
+            }
+            catch (Exception ex)
+            {
+                AppendToConsole($"[ERROR] Failed to download or install PlayIt: {ex.Message}");
+            }
+            finally
+            {
+                // Clean up installer
+                if (File.Exists(tempInstallerPath))
+                {
+                    File.Delete(tempInstallerPath);
+                }
+            }
+        }
+
         private void StartPlayIt()
         {
+            EnsurePlayItInstalled(); // Ensure PlayIt is installed
+
             if (_isPlayItRunning)
             {
                 AppendToConsole("[WARNING] PlayIt is already running.");
@@ -147,23 +227,7 @@ namespace ForgeServer_1._16._5__36._2._42_
                         }
                     };
 
-                    _playItProcess.OutputDataReceived += (sender, e) =>
-                    {
-                        if (string.IsNullOrEmpty(e.Data)) return;
-
-                        Dispatcher.Invoke(() =>
-                        {
-                            if (e.Data.Contains("=>"))
-                            {
-                                var url = ExtractPlayItURL(e.Data);
-                                if (!string.IsNullOrEmpty(url))
-                                {
-                                    _playItURL = url;
-                                    ServerURLTextBox.Text = _playItURL;
-                                }
-                            }
-                        });
-                    };
+                    _playItProcess.OutputDataReceived += PlayIt_OutputDataReceived;
 
                     _playItProcess.Start();
                     _playItProcess.BeginOutputReadLine();
@@ -206,7 +270,7 @@ namespace ForgeServer_1._16._5__36._2._42_
                     if (!string.IsNullOrEmpty(url))
                     {
                         _playItURL = url;
-                        ServerURLTextBox.Text = $"Server-URL: {_playItURL}";
+                        ServerURLTextBox.Text = $"{_playItURL}";
                     }
                 }
             });
