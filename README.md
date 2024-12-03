@@ -72,4 +72,4 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE.md)
 
 - Your donations inspire us to continue improving and adding exciting new features to the project! 🙌
   
-[![Donate via PayPal](https://www.paypalobjects.com/webstatic/en_US/i/buttons/PP_logo_h_200x51.png)](https://paypal.me/YourPayPalUsername)
+[![Donate via PayPal](https://www.paypalobjects.com/webstatic/en_US/i/buttons/PP_logo_h_200x51.png)](https://paypal.me/BV0073194)
