@@ -16,6 +16,7 @@ namespace ForgeServer_1._16._5__36._2._42_
         private string _playItURL;
         private Thread _playItThread;
 
+
         private bool DebugMode = false; // Set to true to enable debug behavior
         private PlayItOutputWindow _playItOutputWindow;
 
