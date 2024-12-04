@@ -288,8 +288,8 @@ namespace ForgeServer_1._16._5__36._2._42_
                 // If server-ip is set, use it; otherwise, fetch the public IP
                 if (!string.IsNullOrEmpty(serverIp))
                 {
-                    AppendToConsole($"[INFO] Server IP from server.properties: {serverIp}:25565");
-                    ServerURLTextBox.Text = $"{serverIp}:25565";
+                    AppendToConsole($"[INFO] Server IP from server.properties: {serverIp}");
+                    ServerURLTextBox.Text = $"{serverIp}";
                 }
                 else
                 {
