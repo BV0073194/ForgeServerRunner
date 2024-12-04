@@ -284,6 +284,18 @@ namespace ForgeServer_1._16._5__36._2._42_
                         MessageBoxImage.Information
                     );
 
+                    // Open CMD window and run "playit" from its installed directory
+                    string playItDirectory = Path.GetDirectoryName(playItPath); // Extract the directory of playit.exe
+
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = "cmd.exe",
+                        Arguments = $"/k \"{playItPath}\"", // Run playit from its full path
+                        WorkingDirectory = playItDirectory, // Set the working directory to playit's directory
+                        CreateNoWindow = false, // Show the CMD window
+                        UseShellExecute = true  // Allow shell execution
+                    });
+
                     FullyTerminateApplication(); // Terminate the application
                 }
                 else
