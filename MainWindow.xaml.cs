@@ -115,21 +115,49 @@ namespace ForgeServer_1._16._5__36._2._42_
             StopPlayIt();
         }
 
-        private void RestartApplication()
+        private void KillAssociatedProcesses()
         {
             try
             {
-                Process.Start(Application.ResourceAssembly.Location);
-                Application.Current.Shutdown(); // Gracefully close the current instance
+                // Kill Minecraft server process
+                if (_minecraftProcess != null && !_minecraftProcess.HasExited)
+                {
+                    _minecraftProcess.Kill();
+                    _minecraftProcess.Dispose();
+                }
+
+                // Kill PlayIt process
+                if (_playItProcess != null && !_playItProcess.HasExited)
+                {
+                    _playItProcess.Kill();
+                    _playItProcess.Dispose();
+                }
+
+                AppendToConsole("[INFO] All associated processes have been terminated.");
             }
             catch (Exception ex)
             {
-                AppendToConsole($"[ERROR] Failed to restart the application: {ex.Message}");
+                AppendToConsole($"[ERROR] Failed to terminate associated processes: {ex.Message}");
             }
         }
 
+        private void FullyTerminateApplication()
+        {
+            try
+            {
+                KillAssociatedProcesses(); // Kill all associated processes
+                AppendToConsole("[INFO] Application is terminating...");
 
-        private void EnsurePlayItInstalled()
+                Application.Current.Shutdown(); // Gracefully shut down the application
+                Process.GetCurrentProcess().Kill(); // Forcefully terminate the process
+            }
+            catch (Exception ex)
+            {
+                AppendToConsole($"[ERROR] Failed to terminate the application: {ex.Message}");
+            }
+        }
+
+        private async void EnsurePlayItInstalled()
         {
             // Default installation path
             string playItPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "playit_gg", "bin", "playit.exe");
@@ -157,8 +185,12 @@ namespace ForgeServer_1._16._5__36._2._42_
             }
 
             // Prompt the user for installation
-            var result = MessageBox.Show("PlayIt is not installed. Would you like to install it now? The server will be stopped, and the app will restart upon successful installation.",
-                "Install PlayIt", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var result = MessageBox.Show(
+                "PlayIt is not installed. Would you like to install it now? The server and associated processes will be stopped, and the app will terminate after installation.",
+                "Install PlayIt",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question
+            );
 
             if (result != MessageBoxResult.Yes)
             {
@@ -166,11 +198,12 @@ namespace ForgeServer_1._16._5__36._2._42_
                 return;
             }
 
-            // Stop the server immediately if running
-            if (_isServerRunning)
+            // Stop the server and PlayIt processes
+            if (_isServerRunning || _isPlayItRunning)
             {
-                AppendToConsole("[INFO] Stopping the server before installing PlayIt...");
-                GracefulStopServerAsync().Wait(); // Ensure server stops before proceeding
+                AppendToConsole("[INFO] Stopping the server and PlayIt processes before installing PlayIt...");
+                await GracefulStopServerAsync(); // Stop the Minecraft server
+                StopPlayIt(); // Stop PlayIt process
             }
 
             // Download and install PlayIt
@@ -202,8 +235,15 @@ namespace ForgeServer_1._16._5__36._2._42_
                 // Confirm installation
                 if (File.Exists(playItPath))
                 {
-                    AppendToConsole("[INFO] PlayIt installed successfully. Restarting the application...");
-                    RestartApplication(); // Restart the app on success
+                    AppendToConsole("[INFO] PlayIt installed successfully.");
+                    MessageBox.Show(
+                        "PlayIt has been successfully installed. The application will now close. Please restart the application manually to apply changes.",
+                        "Installation Successful",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information
+                    );
+
+                    FullyTerminateApplication(); // Terminate the application
                 }
                 else
                 {
