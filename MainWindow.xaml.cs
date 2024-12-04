@@ -157,6 +157,46 @@ namespace ForgeServer_1._16._5__36._2._42_
             }
         }
 
+        private void DisablePlayItSupportAndRestart()
+        {
+            try
+            {
+                // Disable PlayIt support in the configuration
+                var playItConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "playItConfig.json");
+                if (File.Exists(playItConfigPath))
+                {
+                    var config = JsonSerializer.Deserialize<PlayItConfig>(File.ReadAllText(playItConfigPath)) ?? new PlayItConfig();
+                    config.PlayItSupportEnabled = false;
+
+                    File.WriteAllText(
+                        playItConfigPath,
+                        JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true })
+                    );
+
+                    AppendToConsole("[INFO] PlayIt support has been disabled in the configuration.");
+                }
+
+                // Kill all associated processes
+                KillAssociatedProcesses();
+
+                // Restart the application
+                AppendToConsole("[INFO] Restarting the application...");
+                string appPath = Process.GetCurrentProcess().MainModule.FileName;
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = appPath,
+                    UseShellExecute = true
+                });
+
+                Application.Current.Shutdown();
+                Process.GetCurrentProcess().Kill(); // Ensure the current process terminates
+            }
+            catch (Exception ex)
+            {
+                AppendToConsole($"[ERROR] Failed to disable PlayIt support and restart: {ex.Message}");
+            }
+        }
+
         private async void EnsurePlayItInstalled()
         {
             // Default installation path
@@ -192,9 +232,10 @@ namespace ForgeServer_1._16._5__36._2._42_
                 MessageBoxImage.Question
             );
 
-            if (result != MessageBoxResult.Yes)
+            if (result == MessageBoxResult.No)
             {
-                AppendToConsole("[INFO] PlayIt installation was canceled by the user.");
+                AppendToConsole("[INFO] PlayIt installation was declined by the user.");
+                DisablePlayItSupportAndRestart(); // Disable PlayIt support and restart
                 return;
             }
 
