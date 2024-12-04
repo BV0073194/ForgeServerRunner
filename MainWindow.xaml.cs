@@ -115,6 +115,20 @@ namespace ForgeServer_1._16._5__36._2._42_
             StopPlayIt();
         }
 
+        private void RestartApplication()
+        {
+            try
+            {
+                Process.Start(Application.ResourceAssembly.Location);
+                Application.Current.Shutdown(); // Gracefully close the current instance
+            }
+            catch (Exception ex)
+            {
+                AppendToConsole($"[ERROR] Failed to restart the application: {ex.Message}");
+            }
+        }
+
+
         private void EnsurePlayItInstalled()
         {
             // Default installation path
@@ -142,8 +156,24 @@ namespace ForgeServer_1._16._5__36._2._42_
                 }
             }
 
-            // If not found, download the installer
-            AppendToConsole("[INFO] PlayIt not found. Downloading installer...");
+            // Prompt the user for installation
+            var result = MessageBox.Show("PlayIt is not installed. Would you like to install it now? The server will be stopped, and the app will restart upon successful installation.",
+                "Install PlayIt", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes)
+            {
+                AppendToConsole("[INFO] PlayIt installation was canceled by the user.");
+                return;
+            }
+
+            // Stop the server immediately if running
+            if (_isServerRunning)
+            {
+                AppendToConsole("[INFO] Stopping the server before installing PlayIt...");
+                GracefulStopServerAsync().Wait(); // Ensure server stops before proceeding
+            }
+
+            // Download and install PlayIt
             string installerUrl = "https://github.com/playit-cloud/playit-agent/releases/latest/download/playit-windows-x86_64-signed.msi";
             string tempInstallerPath = Path.Combine(Path.GetTempPath(), "playit-installer.msi");
 
@@ -172,7 +202,8 @@ namespace ForgeServer_1._16._5__36._2._42_
                 // Confirm installation
                 if (File.Exists(playItPath))
                 {
-                    AppendToConsole("[INFO] PlayIt installed successfully.");
+                    AppendToConsole("[INFO] PlayIt installed successfully. Restarting the application...");
+                    RestartApplication(); // Restart the app on success
                 }
                 else
                 {
