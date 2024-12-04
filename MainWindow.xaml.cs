@@ -264,9 +264,78 @@ namespace ForgeServer_1._16._5__36._2._42_
             }
         }
 
+        private void DisplayPublicIPAndPort()
+        {
+            try
+            {
+                string serverPropertiesPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "server.properties");
+                string serverIp = null;
+
+                // Check if server.properties exists and read it
+                if (File.Exists(serverPropertiesPath))
+                {
+                    var lines = File.ReadAllLines(serverPropertiesPath);
+                    foreach (var line in lines)
+                    {
+                        if (line.StartsWith("server-ip="))
+                        {
+                            serverIp = line.Split('=')[1].Trim(); // Extract the value of server-ip
+                            break;
+                        }
+                    }
+                }
+
+                // If server-ip is set, use it; otherwise, fetch the public IP
+                if (!string.IsNullOrEmpty(serverIp))
+                {
+                    AppendToConsole($"[INFO] Server IP from server.properties: {serverIp}:25565");
+                    ServerURLTextBox.Text = $"{serverIp}:25565";
+                }
+                else
+                {
+                    // Fetch the public IP
+                    using (var client = new System.Net.WebClient())
+                    {
+                        string publicIp = client.DownloadString("https://api.ipify.org").Trim();
+                        AppendToConsole($"[INFO] Public IP: {publicIp}:25565");
+                        ServerURLTextBox.Text = $"{publicIp}:25565";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                AppendToConsole($"[ERROR] Failed to retrieve public IP or server.properties: {ex.Message}");
+            }
+        }
+
+
         private void StartPlayIt()
         {
-            EnsurePlayItInstalled(); // Ensure PlayIt is installed before starting
+            var playItConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "playItConfig.json");
+            PlayItConfig config = null;
+
+            // Load PlayIt configuration
+            if (File.Exists(playItConfigPath))
+            {
+                try
+                {
+                    config = JsonSerializer.Deserialize<PlayItConfig>(File.ReadAllText(playItConfigPath));
+                }
+                catch
+                {
+                    AppendToConsole("[ERROR] Failed to parse PlayIt configuration.");
+                }
+            }
+
+            // Check if PlayIt support is enabled
+            if (config == null || !config.PlayItSupportEnabled)
+            {
+                DisplayPublicIPAndPort(); // Only display public IP and port if PlayIt is not enabled
+                return;
+            }
+
+            // Ensure PlayIt is installed and start it
+            EnsurePlayItInstalled();
 
             if (_isPlayItRunning)
             {
@@ -274,40 +343,28 @@ namespace ForgeServer_1._16._5__36._2._42_
                 return;
             }
 
-            var playItConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "playItConfig.json");
-            if (!File.Exists(playItConfigPath))
-            {
-                AppendToConsole("[WARNING] PlayIt configuration file not found.");
-                return;
-            }
-
             try
             {
-                var config = JsonSerializer.Deserialize<PlayItConfig>(File.ReadAllText(playItConfigPath));
-                if (config != null && config.PlayItSupportEnabled)
+                _playItProcess = new Process
                 {
-                    _playItProcess = new Process
+                    StartInfo = new ProcessStartInfo
                     {
-                        StartInfo = new ProcessStartInfo
-                        {
-                            FileName = "playit",
-                            RedirectStandardOutput = true,
-                            RedirectStandardError = true,
-                            UseShellExecute = false,
-                            CreateNoWindow = true
-                        }
-                    };
+                        FileName = "playit",
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    }
+                };
 
-                    _playItProcess.OutputDataReceived += PlayIt_OutputDataReceived;
-
-                    _playItProcess.Start();
-                    _playItProcess.BeginOutputReadLine();
-                    _isPlayItRunning = true; // Set the flag
-                }
+                _playItProcess.OutputDataReceived += PlayIt_OutputDataReceived;
+                _playItProcess.Start();
+                _playItProcess.BeginOutputReadLine();
+                _isPlayItRunning = true; // Set the flag
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error starting PlayIt.gg: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                AppendToConsole($"[ERROR] Failed to start PlayIt: {ex.Message}");
             }
         }
 
