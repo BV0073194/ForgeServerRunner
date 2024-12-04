@@ -226,7 +226,7 @@ namespace ForgeServer_1._16._5__36._2._42_
 
         private void StartPlayIt()
         {
-            EnsurePlayItInstalled(); // Ensure PlayIt is installed
+            EnsurePlayItInstalled(); // Ensure PlayIt is installed before starting
 
             if (_isPlayItRunning)
             {
