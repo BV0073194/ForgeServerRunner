@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
 
-namespace ForgeServer_1._16._5__36._2._42_
+namespace ForgeServerRunner
 {
     public partial class FilePickerWindow : Window
     {

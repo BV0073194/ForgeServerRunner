@@ -1,4 +1,4 @@
-<Window x:Class="ForgeServer_1._16._5__36._2._42_.MainWindow"
+﻿<Window x:Class="ForgeServerRunner.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Forge Server Runner" 
@@ -27,7 +27,7 @@
                            FontWeight="Bold" 
                            Foreground="White" 
                            HorizontalAlignment="Center" />
-                <TextBlock Text="Built for v1.16.5 (36.2.42)" 
+                <TextBlock Text="Built for any Forge build ⚒️" 
                            FontSize="14" 
                            Foreground="White" 
                            HorizontalAlignment="Center" 

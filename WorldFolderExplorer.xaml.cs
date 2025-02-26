@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 
-namespace ForgeServer_1._16._5__36._2._42_
+namespace ForgeServerRunner
 {
     public partial class WorldFolderExplorer : Window
     {

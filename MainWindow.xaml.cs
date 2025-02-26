@@ -7,7 +7,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 
-namespace ForgeServer_1._16._5__36._2._42_
+namespace ForgeServerRunner
 {
     public partial class MainWindow : Window
     {
@@ -472,9 +472,11 @@ namespace ForgeServer_1._16._5__36._2._42_
 
         private void StartMinecraftServer(string xmx, string xms)
         {
-            string javaPath = @"./Java/jre1.8.0_421/bin/java.exe";
+            //string javaPath = @"./Java/jre1.8.0_421/bin/java.exe";
+            string javaPath = Directory.GetFiles("./Java/", "java.exe", SearchOption.AllDirectories).FirstOrDefault();
             string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string jarFilePath = Path.Combine(appDirectory, "forge-1.16.5-36.2.42.jar");
+            string jarFilePath = Directory.GetFiles(appDirectory, "forge-*.jar", SearchOption.AllDirectories).FirstOrDefault();
+            //string jarFilePath = Path.Combine(appDirectory, "forge-1.16.5-36.2.42.jar");
 
             string javaArgs = $"-Xmx{xmx} -Xms{xms} -XX:+UnlockExperimentalVMOptions -XX:+AlwaysPreTouch " +
                                "-XX:NewSize=1G -XX:MaxNewSize=2G -XX:SurvivorRatio=2 -XX:+DisableExplicitGC -d64 " +

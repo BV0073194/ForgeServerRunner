@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace ForgeServer_1._16._5__36._2._42_
+namespace ForgeServerRunner
 {
     public partial class PlayItOutputWindow : Window
     {
